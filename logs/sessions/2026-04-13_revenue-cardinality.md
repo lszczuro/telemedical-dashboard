@@ -7,6 +7,7 @@
 - [17:49] Classified multi-row visits by which fields vary and cross-checked against `visits.csv`; most multi-row groups mix `amount`, `payment_type`, and `transaction_date`, and the join looks unreliable because 9,999 of 10,000 revenue rows have a different `patient_id` than the same `visit_id` in `visits.csv`.
 - [17:51] Evaluated split-payment / installment / refund / retry / line-item hypotheses; partial-refund-like and installment-like shapes exist superficially, but patient/date inconsistencies make them weak evidence of true visit-level payment lifecycle.
 - [17:53] Chose a provisional KPI rule: use the earliest non-refunded revenue row per `visit_id` ordered by `transaction_date`, treat visits with only refunded rows as revenue 0, and flag the metric as a best guess until source-key semantics are clarified.
+- [18:00] Cross-checked `transaction_date` against `visit_date`; only 0.09% of revenue rows land on the same day as the joined visit, 1.27% within 7 days, and 5.66% within 30 days, while 49.11% occur before the visit date (down to -1,086 days), which is stronger evidence of broken linkage than the `patient_id` mismatch.
 
 ## Revenue cardinality distribution
 
@@ -44,9 +45,11 @@ Additional shape checks:
 
 The strongest concrete pattern is not a business payment pattern but a data-integrity problem: 9,999 of 10,000 revenue rows have a different `patient_id` than the row with the same `visit_id` in `visits.csv`, and multi-row visits usually contain 2-6 different revenue-side patient IDs. Transaction dates inside one `visit_id` also span a median of 406 days and up to 1,083 days. Example: `VIS003759` has non-refunded revenue rows on `2023-09-30` (`267.57`, `insurance`) and `2024-12-18` (`185.73`, `debit_card`), which does not look like a normal single-visit payment lifecycle.
 
+The date alignment check is even stronger evidence that the join is not meaningful at visit level: only 9 of 10,000 revenue rows (0.09%) occur on the same day as the joined visit, 127 (1.27%) fall within 7 days, and 566 (5.66%) fall within 30 days. Meanwhile 4,911 rows (49.11%) are dated before the joined visit, with the earliest at 1,086 days before. That cannot be explained away by a payer-not-patient model; it points to IDs sharing a namespace without representing the same event.
+
 ## Hypothesis and candidate evaluation
 
-Working hypothesis: repeated revenue rows under one `visit_id` are mostly synthetic-key collisions or otherwise unreliable linkage, not clean split payments / installments / retries / line items for one real visit. The evidence is the cross-table mismatch on `patient_id`, the long date gaps, and the frequent combination of different amounts and payment types inside one `visit_id`.
+Working hypothesis: this is not just weak linkage but effectively no visit-level linkage. `revenue.visit_id` and `visits.visit_id` appear to share a namespace but not a reliable relationship, so repeated revenue rows under one `visit_id` are mostly matching-ID collisions rather than clean split payments / installments / retries / line items for one real visit. The evidence is the near-total `patient_id` mismatch, the extremely poor date alignment, the long intra-visit date gaps, and the frequent combination of different amounts and payment types inside one `visit_id`.
 
 Candidate evaluation:
 
@@ -60,7 +63,7 @@ Candidate evaluation:
 
 Best guess until clarified: compute revenue per visit as the earliest non-refunded row for that `visit_id`, ordered by `transaction_date` then `transaction_id`. If every row for a visit is `refunded=true`, set visit revenue to `0`.
 
-Reasoning: `SUM` is the least defensible choice because it clearly overcounts mixed/collided rows; on multi-row visits, non-refunded `SUM` is 2.18x the earliest non-refunded amount at median, 5.69x at p90, and 56.11x at max. `LAST` and `MAX` are also arbitrary, but they are more exposed to unrelated later rows that appear months or years away from the visit. Earliest non-refunded is still only a provisional heuristic, not a trusted business rule, but it is the least inflationary and most stable fallback available from the current data. Refunded rows are excluded from the chosen amount rather than netted into it, because the refund linkage is too weak to support reliable netting.
+Reasoning: `SUM` is the least defensible choice because it clearly overcounts mixed/collided rows; on multi-row visits, non-refunded `SUM` is 2.18x the earliest non-refunded amount at median, 5.69x at p90, and 56.11x at max. `LAST` and `MAX` are also arbitrary, but they are more exposed to unrelated later rows that appear months or years away from the visit. Earliest non-refunded is still only a provisional heuristic, not a trusted business rule, but it is the least inflationary and most stable fallback available from the current data. Refunded rows are excluded from the chosen amount rather than netted into it, because the refund linkage is too weak to support reliable netting. This must be disclosed carefully: the rule does not produce a true revenue-per-visit metric under the current data quality; it produces a revenue-per-matching-ID metric.
 
 ## Open questions for next session
 
