@@ -12,3 +12,6 @@ during the task.
 
 See [`AGENTS.md`](AGENTS.md) for the conventions followed by AI agents
 (Codex, Claude Code) working in this repo.
+
+## Data
+Source CSVs are not in this repo. Path to source csv files is stored in .env TELEMEDI_DATA_DIR variable.
