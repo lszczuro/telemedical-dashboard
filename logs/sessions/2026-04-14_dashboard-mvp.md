@@ -30,3 +30,4 @@
 - [16:56] Committed to idiomatic direct imports in `app.py` because the file is small and has no name collisions or test seams that justify module-qualified calls at every call site.
 - [16:58] Consolidated the per-task review files into the main session log because they duplicated content already captured here and created five files for one session, which breaks curated log discipline.
 - [17:00] Added a directory existence check for `TELEMEDI_DATA_DIR` so non-directory paths fail with a human-readable runtime error while the design-doc boundary of leaving individual CSV-file failures to pandas remains unchanged.
+- [17:02] Expanded package discovery to include `dashboard.*` so future subpackages install correctly without changing today’s single-package behavior; this is forward-compatibility hygiene, not a fix for a current install failure.
