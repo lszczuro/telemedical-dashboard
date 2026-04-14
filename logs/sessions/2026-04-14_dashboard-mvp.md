@@ -20,3 +20,4 @@
 - [16:18] Implemented `dashboard/app.py` with the locked layout order: title and framing, KPI #1 Altair chart, KPI #2-#5 placeholders, and the bottom revenue disclaimer panel; added the three required README run lines.
 - [16:18] Fixed `pyproject.toml` package discovery after `pip install .` failed on flat-layout auto-discovery of both `dashboard` and `logs`; restricted setuptools package finding to `dashboard`.
 - [16:19] Verified `./.venv/bin/pip install .`, `./.venv/bin/python -m compileall dashboard`, `dashboard.app` import, and headless Streamlit startup against `/home/lszczuro/telemedi-data`; missing-env startup could not be reproduced from the repo root because `.env` is auto-loaded in this workspace.
+- [16:20] Reviewed Task 4 for code quality only in `dashboard/app.py`, `README.md`, `pyproject.toml`, and this session log; found no substantive correctness or risk issues in the packaging fix or Streamlit layout behavior.

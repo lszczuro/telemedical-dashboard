@@ -1,0 +1,11 @@
+README.md
+pyproject.toml
+dashboard/__init__.py
+dashboard/app.py
+dashboard/data.py
+dashboard/kpis.py
+telemedical_dashboard.egg-info/PKG-INFO
+telemedical_dashboard.egg-info/SOURCES.txt
+telemedical_dashboard.egg-info/dependency_links.txt
+telemedical_dashboard.egg-info/requires.txt
+telemedical_dashboard.egg-info/top_level.txt
