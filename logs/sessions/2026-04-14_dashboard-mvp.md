@@ -28,3 +28,4 @@
 - [16:47] Audited repo byproducts and expanded `.gitignore` to cover standard Python cache and packaging outputs (`.pytest_cache/`, `.mypy_cache/`, `.ruff_cache/`, `dist/`) in addition to the existing local env/build ignores.
 - [16:50] Checked git tracking after the ignore cleanup and found `telemedical_dashboard.egg-info/` was still tracked; prepared it for removal from git because `*.egg-info/` is now ignored.
 - [16:56] Committed to idiomatic direct imports in `app.py` because the file is small and has no name collisions or test seams that justify module-qualified calls at every call site.
+- [16:58] Consolidated the per-task review files into the main session log because they duplicated content already captured here and created five files for one session, which breaks curated log discipline.
