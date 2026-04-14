@@ -41,15 +41,15 @@ This is the anchor demand KPI for the Head of Operations. It answers: *how much 
 
 ### 2. Cancellation rate
 
-This answers: *where are booked visits being lost before care is delivered?* It is computed as `count(status = 'cancelled') / count(all visits)` for a chosen time grain. The caveat from [data-consistency-review.md](data-consistency-review.md) matters here: cancelled rows can carry `duration_min > 0`, but that time should be treated as operational handling time, not completed consultation time. That caveat does **not** block the cancellation-rate KPI itself; it simply means the same rows must remain in the cancellation numerator and must not be reclassified as delivered care. The operational decision is whether to tighten reminder workflows, booking windows, or schedule buffers in teams or periods with elevated cancellations.
+This answers: *where are booked visits being lost before care is delivered?* It is computed as `count(status = 'cancelled') / count(all visits)` for a chosen time grain. The caveat from [data-consistency-review.md](data-consistency-review.md) matters here: cancelled rows can carry `duration_min > 0`, but that time should be treated as operational handling time, not completed consultation time. That caveat does **not** block the cancellation-rate KPI itself; it simply means the same rows must remain in the cancellation numerator and must not be reclassified as delivered care. The operational decision is whether to tighten reminder workflows, booking windows, or schedule buffers in teams or periods with elevated cancellations. In the dashboard this should remain a top-row KPI tile, but the tile must include a short recent-period sparkline and period-over-period delta so the stakeholder can see whether the rate is worsening or improving instead of reading a decontextualized snapshot.
 
 ### 3. No-show rate
 
-This answers: *where are patients failing to attend after booking?* It is computed as `count(status = 'no_show') / count(all visits)` over time and optionally by visit type or diagnosis category. The relevant caveat is again from [data-consistency-review.md](data-consistency-review.md): `no_show` rows have `duration_min = 0` consistently, which supports treating them as a clean attendance-failure status distinct from cancelled visits. The decision it supports is intervention targeting: where to add reminders, confirmation flows, overbooking rules, or stricter booking policies.
+This answers: *where are patients failing to attend after booking?* It is computed as `count(status = 'no_show') / count(all visits)` over time and optionally by visit type or diagnosis category. The relevant caveat is again from [data-consistency-review.md](data-consistency-review.md): `no_show` rows have `duration_min = 0` consistently, which supports treating them as a clean attendance-failure status distinct from cancelled visits. The decision it supports is intervention targeting: where to add reminders, confirmation flows, overbooking rules, or stricter booking policies. In the dashboard this should also stay in the top-row KPI tier, but only as a tile paired with a recent trend sparkline and change indicator, because the operational signal is in whether no-shows are rising, not in a single isolated percentage.
 
 ### 4. Average patient satisfaction for completed visits
 
-This answers: *is the delivered care experience stable while operations are scaled or rebalanced?* It is computed as the average of `satisfaction_score` for rows where `status = 'completed'`. The consistency review matters because satisfaction is null for all cancelled and no-show rows and populated for completed rows, so the metric should stay explicitly limited to completed visits rather than treating nulls as zeros. The decision it supports is quality management: where to investigate specific service lines, doctors, or demand segments that show deteriorating patient experience.
+This answers: *is the delivered care experience stable while operations are scaled or rebalanced?* It is computed as the average of `satisfaction_score` for rows where `status = 'completed'`. The consistency review matters because satisfaction is null for all cancelled and no-show rows and populated for completed rows, so the metric should stay explicitly limited to completed visits rather than treating nulls as zeros. The decision it supports is quality management: where to investigate specific service lines, doctors, or demand segments that show deteriorating patient experience. For intervention targeting, this KPI should be segmented by `visit_type`, not left as a single blended average. The rationale for choosing `visit_type` is coherence: it matches KPI #1, keeps the dashboard centered on one operational dimension, and gives the Head of Operations a cleaner path from demand mix to experience issues than a doctor-level view would at this stage.
 
 ### 5. Doctor utilization minutes from completed consultations
 
@@ -80,11 +80,12 @@ This KPI is rejected because it would require joining revenue to `visits.diagnos
 ## 5. Dashboard layout sketch
 
 ```md
-Top row: 4 operational tiles | Scheduled visits | Cancellation rate | No-show rate | Avg satisfaction (completed only)
+Top row: 4 operational tiles | Scheduled visits | Cancellation rate + recent sparkline/delta | No-show rate + recent sparkline/delta | Avg satisfaction (completed only)
 
 Middle row:
 - Left: weekly visit volume time series split by visit type
 - Right: doctor utilization chart or heatmap using completed-consultation minutes only
+- Additional small panel under or beside the top row context: avg satisfaction by visit type for completed visits
 
 Bottom row:
 - Left: diagnosis demand mix or visit type mix panel for operational routing context
