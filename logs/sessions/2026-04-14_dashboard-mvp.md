@@ -12,3 +12,5 @@
 - [16:01] Reviewed Task 1 scaffolding files for code quality; found no substantive correctness or risk issues in the package marker, dependency declaration, or session-log update.
 - [16:03] Implemented `dashboard/data.py` as a frozen `TelemediData` container plus a single `load_all()` function that resolves `TELEMEDI_DATA_DIR` inside the call and reads the four CSVs with the required date parsing shape.
 - [16:04] Verified the loader imports cleanly in an isolated venv and raises `RuntimeError("Missing required environment variable: TELEMEDI_DATA_DIR")` when `TELEMEDI_DATA_DIR` is absent outside the repo `.env` context.
+- [16:15] Added `dashboard/kpis.py` with KPI #1 as a pure pandas aggregation returning tidy `week`, `visit_type`, `visit_count` output for week-ending Sunday buckets.
+- [16:24] Verified the KPI contract in `.venv` with the inline sample; `python3 -m compileall dashboard` passed and the sample returned two rows with columns `['week', 'visit_type', 'visit_count']`.
