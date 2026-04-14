@@ -14,3 +14,4 @@
 - [16:04] Verified the loader imports cleanly in an isolated venv and raises `RuntimeError("Missing required environment variable: TELEMEDI_DATA_DIR")` when `TELEMEDI_DATA_DIR` is absent outside the repo `.env` context.
 - [16:15] Added `dashboard/kpis.py` with KPI #1 as a pure pandas aggregation returning tidy `week`, `visit_type`, `visit_count` output for week-ending Sunday buckets.
 - [16:24] Verified the KPI contract in `.venv` with the inline sample; `python3 -m compileall dashboard` passed and the sample returned two rows with columns `['week', 'visit_type', 'visit_count']`.
+- [16:31] Corrected the accidental tracking of local verification artifacts by ignoring `.venv/` and `__pycache__/` and preparing them for removal from git without deleting the local files.
