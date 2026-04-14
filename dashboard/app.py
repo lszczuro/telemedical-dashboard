@@ -242,15 +242,10 @@ def main() -> None:
         st.caption(KPI_5_CAPTION)
 
     st.divider()
-    bottom_left, bottom_right = st.columns(2)
-    with bottom_left:
-        st.empty()
-
-    with bottom_right:
-        st.subheader("Revenue Panel")
-        st.warning(REVENUE_DISCLAIMER)
-        st.altair_chart(gross_revenue_chart, use_container_width=True)
-        st.altair_chart(refund_rate_chart, use_container_width=True)
+    st.subheader("Revenue Panel")
+    st.warning(REVENUE_DISCLAIMER)
+    st.altair_chart(gross_revenue_chart, use_container_width=True)
+    st.altair_chart(refund_rate_chart, use_container_width=True)
 
 
 if __name__ == "__main__":
