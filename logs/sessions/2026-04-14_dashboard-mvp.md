@@ -22,3 +22,4 @@
 - [16:19] Verified `./.venv/bin/pip install .`, `./.venv/bin/python -m compileall dashboard`, `dashboard.app` import, and headless Streamlit startup against `/home/lszczuro/telemedi-data`; missing-env startup could not be reproduced from the repo root because `.env` is auto-loaded in this workspace.
 - [16:20] Reviewed Task 4 for code quality only in `dashboard/app.py`, `README.md`, `pyproject.toml`, and this session log; found no substantive correctness or risk issues in the packaging fix or Streamlit layout behavior.
 - [16:27] Switched `dashboard/app.py` to module-qualified calls and verified `.venv/bin/python -m compileall dashboard/app.py` and `.venv/bin/python -c "import dashboard.app"` both succeed.
+- [16:29] Re-reviewed Task 4 for spec compliance after the follow-up fix; current branch matches the locked order, required function usage, README run lines, disclaimer text, and session-log requirement.
