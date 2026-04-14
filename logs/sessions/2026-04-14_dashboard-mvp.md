@@ -10,3 +10,5 @@
 - [15:59] Declared dashboard runtime dependencies in `pyproject.toml`; chose Altair as the chart library for the dashboard slice.
 - [16:00] Verified `pyproject.toml` parses with Python `tomllib` and confirmed the new package marker is in place.
 - [16:01] Reviewed Task 1 scaffolding files for code quality; found no substantive correctness or risk issues in the package marker, dependency declaration, or session-log update.
+- [16:03] Implemented `dashboard/data.py` as a frozen `TelemediData` container plus a single `load_all()` function that resolves `TELEMEDI_DATA_DIR` inside the call and reads the four CSVs with the required date parsing shape.
+- [16:04] Verified the loader imports cleanly in an isolated venv and raises `RuntimeError("Missing required environment variable: TELEMEDI_DATA_DIR")` when `TELEMEDI_DATA_DIR` is absent outside the repo `.env` context.
