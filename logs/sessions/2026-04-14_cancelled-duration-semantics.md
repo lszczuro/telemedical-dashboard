@@ -1,0 +1,2 @@
+# Goal: investigate what `visits.status = 'cancelled'` means when `duration_min > 0`, compare it with `no_show` and `completed`, and decide KPI treatment for no-show rate, cancellation rate, and doctor utilization.
+- [15:08] Started session for cancelled-duration semantics, loaded the required skills, reviewed prior repo findings, and confirmed the requested session slug `cancelled-duration-semantics`.
