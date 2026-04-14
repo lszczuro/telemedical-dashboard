@@ -101,6 +101,8 @@ def compute_doctor_utilization_minutes(
     return result[["doctor_id", "specialization", "utilization_minutes"]]
 
 
+# Operates on `revenue.csv` only; does not accept `visits` to prevent accidental
+# revenue-to-visit joins (see docs/data-consistency-review.md).
 def compute_gross_revenue_by_week(revenue: pd.DataFrame) -> pd.DataFrame:
     """Return gross revenue summed by week-ending Sunday."""
 
