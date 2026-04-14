@@ -5,8 +5,8 @@ from __future__ import annotations
 import altair as alt
 import streamlit as st
 
-from dashboard.data import load_all
-from dashboard.kpis import compute_scheduled_visit_volume_by_week_and_type
+import dashboard.data
+import dashboard.kpis
 
 REVENUE_DISCLAIMER = (
     "Revenue metrics are shown from `revenue.csv` only and are not linked to "
@@ -26,8 +26,10 @@ def main() -> None:
         "and revenue explicitly separated until attribution is trustworthy."
     )
 
-    data = load_all()
-    scheduled_volume = compute_scheduled_visit_volume_by_week_and_type(data.visits)
+    data = dashboard.data.load_all()
+    scheduled_volume = dashboard.kpis.compute_scheduled_visit_volume_by_week_and_type(
+        data.visits
+    )
 
     chart = (
         alt.Chart(scheduled_volume)
