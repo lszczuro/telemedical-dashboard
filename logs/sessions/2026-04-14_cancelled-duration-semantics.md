@@ -4,6 +4,7 @@
 - [15:10] Computed duration summaries for `cancelled` with `duration_min > 0`, `no_show`, and `completed`; confirmed `cancelled` with duration is tightly bounded at `1-10` minutes, `no_show` is always `0`, and `completed` spans `5-60` minutes.
 - [15:11] Compared distribution shape across groups; found cancelled-with-duration has quartiles `3/6/8` and no values above `10`, while completed has quartiles `18/32/46`, so the cancelled rows do not look like shortened versions of completed consultations.
 - [15:12] Chose a working semantic interpretation and metric treatment: treat cancelled-with-duration rows as genuine cancellations with short operational handling time, not as completed or no-show visits and not as doctor utilization minutes.
+- [15:11] Added a follow-up open question for the `115` zero-duration cancelled rows and recorded that current KPI decisions still treat both cancelled subgroups uniformly as cancellations, not no-shows.
 
 ## Duration summaries
 
@@ -38,4 +39,5 @@ Chosen interpretation: option 2 is more defensible. If these were mostly partial
 ## Open questions for next session
 
 - Confirm with the data owner whether cancelled `duration_min` is expected to mean cancellation handling / triage / admin time, or whether some rows can reflect a clinically meaningful partial encounter.
+- Clarify what the `115` cancelled rows with `duration_min = 0` represent: advance cancellation before any handling occurred, or the same category as the `1,270` cancelled rows with handling time captured. Current KPI decisions treat both cancelled subgroups uniformly as cancellations, not no-shows.
 - If operations needs a broader workload metric later, decide whether cancelled-with-duration should feed a separate non-utilization bucket such as admin handling minutes rather than being dropped entirely from time-based reporting.
