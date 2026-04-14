@@ -15,3 +15,6 @@ See [`AGENTS.md`](AGENTS.md) for the conventions followed by AI agents
 
 ## Data
 Source CSVs are not in this repo. Path to source csv files is stored in .env TELEMEDI_DATA_DIR variable.
+Install dependencies: `pip install .`
+Set `TELEMEDI_DATA_DIR` in your environment as shown in [`.env.example`](.env.example).
+Run the app: `streamlit run dashboard/app.py`
