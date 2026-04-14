@@ -1,0 +1,10 @@
+# Session goal: Add satisfaction-by-visit-type and doctor-utilization KPIs to the middle row of the dashboard and document the implementation decisions live.
+
+- [20:13] Started branch work for quality and utilization KPIs; reviewed AGENTS.md requirements, loaded the existing dashboard baseline, and confirmed this session needs a dedicated live log.
+- [20:14] Bootstrapped a local `.venv`, installed the project plus `pytest`, and confirmed the live schema: `visit_type` = `chat/phone/video`, `status` = `cancelled/completed/no_show`, and doctor metadata is keyed by `doctor_id`.
+- [20:14] Wrote failing pytest coverage for the two new pure KPI functions first; the red run failed on missing exports, which confirmed the tests were exercising the new surface.
+- [20:15] Implemented `compute_satisfaction_by_visit_type()` to filter to `status='completed'` before aggregation and return `visit_type`, `avg_satisfaction`, and `completed_visit_count` without using `dropna()` to express the null-handling intent.
+- [20:15] Implemented `compute_doctor_utilization_minutes()` to sum only completed `duration_min`, join `doctors` inside the function, and add the one-line consistency-review comment explaining why cancelled rows are excluded even when duration is non-zero.
+- [20:15] Chose a horizontal bar chart for satisfaction with completed-visit sample size shown in the tooltip, and a ranked horizontal bar chart for utilization showing the top 10 plus bottom 5 doctors by completed minutes.
+- [20:15] Kept doctors with zero completed visits out of the utilization output and chart as an explicit known limitation for this scope; the dashboard now places KPI #4 left and KPI #5 right in the middle row and removes their placeholders from `Coming next`.
+- [20:15] Verified the implementation with `.venv/bin/pytest tests/test_kpis.py` (green) and `timeout 15s .venv/bin/streamlit run dashboard/app.py --server.headless true --server.port 8501`, which reached the Streamlit startup URLs before the intentional timeout stop.

@@ -9,7 +9,9 @@ import streamlit as st
 from dashboard.data import load_all
 from dashboard.kpis import (
     compute_cancellation_rate_by_week,
+    compute_doctor_utilization_minutes,
     compute_no_show_rate_by_week,
+    compute_satisfaction_by_visit_type,
     compute_scheduled_visit_volume_by_week_and_type,
 )
 
@@ -26,6 +28,14 @@ KPI_2_CAPTION = (
     "including those with non-zero recorded duration."
 )
 KPI_3_CAPTION = "No-show rate across all booked visits with `status = 'no_show'` only."
+KPI_4_CAPTION = (
+    "Completed-visit satisfaction by consultation format. Tooltip shows the "
+    "sample size so small cohorts are visible next to the average."
+)
+KPI_5_CAPTION = (
+    "Completed clinician minutes ranked across the top 10 and bottom 5 doctors. "
+    "Doctors with zero completed visits are intentionally absent for now."
+)
 
 
 def _last_complete_week(visit_dates: pd.Series) -> pd.Timestamp:
@@ -68,6 +78,59 @@ def _render_trend_tile(
     st.line_chart(sparkline_data, height=100)
 
 
+def build_satisfaction_chart(satisfaction_by_visit_type: pd.DataFrame) -> alt.Chart:
+    return (
+        alt.Chart(satisfaction_by_visit_type)
+        .mark_bar()
+        .encode(
+            x=alt.X(
+                "avg_satisfaction:Q", title="Average satisfaction", scale=alt.Scale(domain=[0, 5])
+            ),
+            y=alt.Y("visit_type:N", title="Visit type", sort="-x"),
+            color=alt.Color("visit_type:N", title="Visit type", legend=None),
+            tooltip=[
+                alt.Tooltip("visit_type:N", title="Visit type"),
+                alt.Tooltip("avg_satisfaction:Q", title="Average satisfaction", format=".2f"),
+                alt.Tooltip("completed_visit_count:Q", title="Completed visits", format=","),
+            ],
+        )
+        .properties(title="Patient Satisfaction by Visit Type")
+    )
+
+
+def build_utilization_chart(utilization_minutes: pd.DataFrame) -> alt.Chart:
+    ranked = utilization_minutes.copy()
+    top_n = 10
+    bottom_n = 5
+
+    ranked["rank_desc"] = ranked["utilization_minutes"].rank(method="first", ascending=False)
+    ranked["rank_asc"] = ranked["utilization_minutes"].rank(method="first", ascending=True)
+    filtered = ranked.loc[(ranked["rank_desc"] <= top_n) | (ranked["rank_asc"] <= bottom_n)].copy()
+    filtered["segment"] = filtered["rank_desc"].le(top_n).map({True: "Top 10", False: "Bottom 5"})
+    filtered = filtered.sort_values(["utilization_minutes", "doctor_id"], ascending=[False, True])
+
+    return (
+        alt.Chart(filtered)
+        .mark_bar()
+        .encode(
+            x=alt.X("utilization_minutes:Q", title="Utilization minutes"),
+            y=alt.Y("doctor_id:N", title="Doctor", sort="-x"),
+            color=alt.Color(
+                "segment:N",
+                title="Ranking slice",
+                scale=alt.Scale(domain=["Top 10", "Bottom 5"], range=["#1f77b4", "#ff7f0e"]),
+            ),
+            tooltip=[
+                alt.Tooltip("doctor_id:N", title="Doctor"),
+                alt.Tooltip("specialization:N", title="Specialization"),
+                alt.Tooltip("utilization_minutes:Q", title="Utilization minutes", format=","),
+                alt.Tooltip("segment:N", title="Shown as"),
+            ],
+        )
+        .properties(title="Doctor Utilization Minutes")
+    )
+
+
 def main() -> None:
     st.set_page_config(page_title="Telemedi Operations Dashboard", layout="wide")
     st.title("Telemedi Operations Dashboard")
@@ -80,6 +143,8 @@ def main() -> None:
     scheduled_volume = compute_scheduled_visit_volume_by_week_and_type(data.visits)
     cancellation_rate = compute_cancellation_rate_by_week(data.visits)
     no_show_rate = compute_no_show_rate_by_week(data.visits)
+    satisfaction_by_visit_type = compute_satisfaction_by_visit_type(data.visits)
+    doctor_utilization = compute_doctor_utilization_minutes(data.visits, data.doctors)
     last_complete_week = _last_complete_week(data.visits["visit_date"])
 
     weekly_scheduled_summary = (
@@ -141,14 +206,17 @@ def main() -> None:
     st.altair_chart(chart, use_container_width=True)
     st.caption(KPI_1_CAPTION)
 
-    upcoming_kpis = [
-        "KPI #4 placeholder: Average patient satisfaction",
-        "KPI #5 placeholder: Doctor utilization minutes",
-    ]
-    if len(upcoming_kpis) >= 2:
-        st.subheader("Coming next")
-        for item in upcoming_kpis:
-            st.info(item)
+    left_col, right_col = st.columns(2)
+
+    with left_col:
+        st.altair_chart(
+            build_satisfaction_chart(satisfaction_by_visit_type), use_container_width=True
+        )
+        st.caption(KPI_4_CAPTION)
+
+    with right_col:
+        st.altair_chart(build_utilization_chart(doctor_utilization), use_container_width=True)
+        st.caption(KPI_5_CAPTION)
 
     st.subheader("Revenue Disclaimer")
     st.warning(REVENUE_DISCLAIMER)

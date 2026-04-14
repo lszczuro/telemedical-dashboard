@@ -8,6 +8,8 @@ __all__ = [
     "compute_scheduled_visit_volume_by_week_and_type",
     "compute_cancellation_rate_by_week",
     "compute_no_show_rate_by_week",
+    "compute_satisfaction_by_visit_type",
+    "compute_doctor_utilization_minutes",
 ]
 
 
@@ -61,3 +63,37 @@ def compute_no_show_rate_by_week(visits: pd.DataFrame) -> pd.DataFrame:
         .reset_index(drop=True)
     )
     return grouped[["week", "rate"]]
+
+
+def compute_satisfaction_by_visit_type(visits: pd.DataFrame) -> pd.DataFrame:
+    """Return average satisfaction and sample size by visit type for completed visits."""
+
+    completed_visits = visits.loc[visits["status"] == "completed"]
+    grouped = (
+        completed_visits.groupby("visit_type", dropna=False)["satisfaction_score"]
+        .agg(avg_satisfaction="mean", completed_visit_count="size")
+        .reset_index()
+        .sort_values("visit_type")
+        .reset_index(drop=True)
+    )
+    return grouped[["visit_type", "avg_satisfaction", "completed_visit_count"]]
+
+
+def compute_doctor_utilization_minutes(
+    visits: pd.DataFrame, doctors: pd.DataFrame
+) -> pd.DataFrame:
+    """Return completed-visit utilization minutes by doctor and specialization."""
+
+    # Exclude cancelled handling-time rows per docs/data-consistency-review.md.
+    completed_visits = visits.loc[visits["status"] == "completed"]
+    utilization = (
+        completed_visits.groupby("doctor_id", dropna=False)["duration_min"]
+        .sum()
+        .reset_index(name="utilization_minutes")
+    )
+    result = (
+        utilization.merge(doctors[["doctor_id", "specialization"]], on="doctor_id", how="inner")
+        .sort_values(["utilization_minutes", "doctor_id"], ascending=[False, True])
+        .reset_index(drop=True)
+    )
+    return result[["doctor_id", "specialization", "utilization_minutes"]]
