@@ -1,9 +1,0 @@
-Metadata-Version: 2.4
-Name: telemedical-dashboard
-Version: 0.1.0
-Summary: Streamlit dashboard for Telemedi KPI analysis.
-Requires-Python: >=3.11
-Requires-Dist: altair==5.5.0
-Requires-Dist: pandas==2.2.3
-Requires-Dist: python-dotenv==1.1.1
-Requires-Dist: streamlit==1.44.1
