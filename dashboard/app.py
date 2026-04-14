@@ -10,7 +10,9 @@ from dashboard.data import load_all
 from dashboard.kpis import (
     compute_cancellation_rate_by_week,
     compute_doctor_utilization_minutes,
+    compute_gross_revenue_by_week,
     compute_no_show_rate_by_week,
+    compute_refund_rate_by_week,
     compute_satisfaction_by_visit_type,
     compute_scheduled_visit_volume_by_week_and_type,
 )
@@ -135,8 +137,8 @@ def main() -> None:
     st.set_page_config(page_title="Telemedi Operations Dashboard", layout="wide")
     st.title("Telemedi Operations Dashboard")
     st.write(
-        "For the Head of Operations: weekly demand first, remaining KPI slots visible, "
-        "and revenue explicitly separated until attribution is trustworthy."
+        "For the Head of Operations: weekly demand first and revenue explicitly "
+        "separated until attribution is trustworthy."
     )
 
     data = load_all()
@@ -145,6 +147,8 @@ def main() -> None:
     no_show_rate = compute_no_show_rate_by_week(data.visits)
     satisfaction_by_visit_type = compute_satisfaction_by_visit_type(data.visits)
     doctor_utilization = compute_doctor_utilization_minutes(data.visits, data.doctors)
+    gross_revenue = compute_gross_revenue_by_week(data.revenue)
+    refund_rate = compute_refund_rate_by_week(data.revenue)
     last_complete_week = _last_complete_week(data.visits["visit_date"])
 
     weekly_scheduled_summary = (
@@ -192,7 +196,7 @@ def main() -> None:
             help_text=KPI_3_CAPTION,
         )
 
-    chart = (
+    scheduled_volume_chart = (
         alt.Chart(scheduled_volume)
         .mark_line(point=True)
         .encode(
@@ -203,23 +207,45 @@ def main() -> None:
         .properties(title="Scheduled Visit Volume by Week and Visit Type")
     )
 
-    st.altair_chart(chart, use_container_width=True)
+    gross_revenue_chart = (
+        alt.Chart(gross_revenue)
+        .mark_line(point=True)
+        .encode(
+            x=alt.X("week:T", title="Week ending"),
+            y=alt.Y("gross_revenue:Q", title="Gross revenue"),
+        )
+        .properties(title="Gross Revenue Trend")
+    )
+
+    refund_rate_chart = (
+        alt.Chart(refund_rate)
+        .mark_line(point=True)
+        .encode(
+            x=alt.X("week:T", title="Week ending"),
+            y=alt.Y("refund_rate:Q", title="Refund rate", axis=alt.Axis(format=".0%")),
+        )
+        .properties(title="Refund Rate Trend")
+    )
+
+    st.altair_chart(scheduled_volume_chart, use_container_width=True)
     st.caption(KPI_1_CAPTION)
 
-    left_col, right_col = st.columns(2)
-
-    with left_col:
+    middle_left, middle_right = st.columns(2)
+    with middle_left:
         st.altair_chart(
             build_satisfaction_chart(satisfaction_by_visit_type), use_container_width=True
         )
         st.caption(KPI_4_CAPTION)
 
-    with right_col:
+    with middle_right:
         st.altair_chart(build_utilization_chart(doctor_utilization), use_container_width=True)
         st.caption(KPI_5_CAPTION)
 
-    st.subheader("Revenue Disclaimer")
+    st.divider()
+    st.subheader("Revenue Panel")
     st.warning(REVENUE_DISCLAIMER)
+    st.altair_chart(gross_revenue_chart, use_container_width=True)
+    st.altair_chart(refund_rate_chart, use_container_width=True)
 
 
 if __name__ == "__main__":

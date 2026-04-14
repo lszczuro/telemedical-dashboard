@@ -10,6 +10,8 @@ __all__ = [
     "compute_no_show_rate_by_week",
     "compute_satisfaction_by_visit_type",
     "compute_doctor_utilization_minutes",
+    "compute_gross_revenue_by_week",
+    "compute_refund_rate_by_week",
 ]
 
 
@@ -97,3 +99,40 @@ def compute_doctor_utilization_minutes(
         .reset_index(drop=True)
     )
     return result[["doctor_id", "specialization", "utilization_minutes"]]
+
+
+# Operates on `revenue.csv` only; does not accept `visits` to prevent accidental
+# revenue-to-visit joins (see docs/data-consistency-review.md).
+def compute_gross_revenue_by_week(revenue: pd.DataFrame) -> pd.DataFrame:
+    """Return gross revenue summed by week-ending Sunday."""
+
+    grouped = (
+        revenue.assign(
+            week=revenue["transaction_date"].dt.to_period("W-SUN").dt.end_time.dt.normalize()
+        )
+        .groupby("week", dropna=False)["amount"]
+        .sum()
+        .reset_index(name="gross_revenue")
+        .sort_values("week")
+        .reset_index(drop=True)
+    )
+    return grouped[["week", "gross_revenue"]]
+
+
+# Use refunded amount / total amount so the rate reflects financial impact, not just
+# transaction frequency. This intentionally operates on `revenue.csv` only.
+def compute_refund_rate_by_week(revenue: pd.DataFrame) -> pd.DataFrame:
+    """Return weekly refund rate as refunded amount divided by total amount."""
+
+    weekly = revenue.assign(
+        week=revenue["transaction_date"].dt.to_period("W-SUN").dt.end_time.dt.normalize(),
+        refunded_amount=revenue["amount"].where(revenue["refunded"], 0.0),
+    ).groupby("week", dropna=False)[["amount", "refunded_amount"]].sum()
+
+    result = (
+        weekly.assign(refund_rate=weekly["refunded_amount"] / weekly["amount"])
+        .reset_index()[["week", "refund_rate"]]
+        .sort_values("week")
+        .reset_index(drop=True)
+    )
+    return result

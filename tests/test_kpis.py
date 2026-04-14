@@ -4,6 +4,8 @@ import pandas as pd
 
 from dashboard.kpis import (
     compute_doctor_utilization_minutes,
+    compute_gross_revenue_by_week,
+    compute_refund_rate_by_week,
     compute_satisfaction_by_visit_type,
 )
 
@@ -92,3 +94,49 @@ def test_compute_doctor_utilization_minutes_sums_only_completed_visits() -> None
             "utilization_minutes": 20,
         },
     ]
+
+
+def test_compute_gross_revenue_by_week_groups_revenue_rows_by_week() -> None:
+    revenue = pd.DataFrame(
+        {
+            "transaction_date": pd.to_datetime(
+                ["2024-01-01", "2024-01-03", "2024-01-08", "2024-01-10"]
+            ),
+            "amount": [100.0, 50.0, 40.0, 10.0],
+            "refunded": [False, True, False, False],
+        }
+    )
+
+    result = compute_gross_revenue_by_week(revenue)
+
+    expected = pd.DataFrame(
+        {
+            "week": pd.to_datetime(["2024-01-07", "2024-01-14"]),
+            "gross_revenue": [150.0, 50.0],
+        }
+    )
+
+    pd.testing.assert_frame_equal(result, expected)
+
+
+def test_compute_refund_rate_by_week_returns_amount_based_rate() -> None:
+    revenue = pd.DataFrame(
+        {
+            "transaction_date": pd.to_datetime(
+                ["2024-01-01", "2024-01-03", "2024-01-08", "2024-01-10"]
+            ),
+            "amount": [100.0, 50.0, 40.0, 10.0],
+            "refunded": [False, True, False, False],
+        }
+    )
+
+    result = compute_refund_rate_by_week(revenue)
+
+    expected = pd.DataFrame(
+        {
+            "week": pd.to_datetime(["2024-01-07", "2024-01-14"]),
+            "refund_rate": [50.0 / 150.0, 0.0],
+        }
+    )
+
+    pd.testing.assert_frame_equal(result, expected)
