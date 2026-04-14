@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "telemedical-dashboard"
+version = "0.1.0"
+description = "Streamlit dashboard for Telemedi KPI analysis."
+requires-python = ">=3.11"
+dependencies = [
+  "altair==5.5.0",
+  "pandas==2.2.3",
+  "python-dotenv==1.1.1",
+  "streamlit==1.44.1",
+]
+
+[tool.setuptools.packages.find]
+include = ["dashboard", "dashboard.*"]

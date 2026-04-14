@@ -1,0 +1,33 @@
+# Session goal: Build the first runnable Streamlit dashboard vertical slice with KPI #1 and revenue disclaimer placeholder.
+
+- [15:04] Reviewed AGENTS.md and loaded required skills: workflow-logger, brainstorming, and test-driven-development.
+- [15:05] Inspected repository state, KPI scope, README, env example, and recent commits to prepare the MVP dashboard design.
+- [15:07] Confirmed KPI #1 week grain will use Monday-start weeks with Sunday-close labeling via pandas `W-SUN`.
+- [15:12] Locked the implementation design: frozen `TelemediData` container, `load_dotenv()` inside `load_all()`, Altair charting, and `pyproject.toml` for dependencies.
+- [15:14] Wrote the dashboard MVP design spec under `docs/superpowers/specs/` and checked it for scope gaps and ambiguity.
+- [15:18] Refined the spec to keep `patients.csv` and `doctors.csv` date fields unparsed in this story because KPI #1 does not use them.
+- [15:23] Wrote the implementation plan under `docs/superpowers/plans/` with explicit module boundaries, manual verification steps, and no automated test files per story scope.
+- [15:59] Declared dashboard runtime dependencies in `pyproject.toml`; chose Altair as the chart library for the dashboard slice.
+- [16:00] Verified `pyproject.toml` parses with Python `tomllib` and confirmed the new package marker is in place.
+- [16:01] Reviewed Task 1 scaffolding files for code quality; found no substantive correctness or risk issues in the package marker, dependency declaration, or session-log update.
+- [16:03] Implemented `dashboard/data.py` as a frozen `TelemediData` container plus a single `load_all()` function that resolves `TELEMEDI_DATA_DIR` inside the call and reads the four CSVs with the required date parsing shape.
+- [16:04] Verified the loader imports cleanly in an isolated venv and raises `RuntimeError("Missing required environment variable: TELEMEDI_DATA_DIR")` when `TELEMEDI_DATA_DIR` is absent outside the repo `.env` context.
+- [16:15] Added `dashboard/kpis.py` with KPI #1 as a pure pandas aggregation returning tidy `week`, `visit_type`, `visit_count` output for week-ending Sunday buckets.
+- [16:24] Verified the KPI contract in `.venv` with the inline sample; `python3 -m compileall dashboard` passed and the sample returned two rows with columns `['week', 'visit_type', 'visit_count']`.
+- [16:31] Corrected the accidental tracking of local verification artifacts by ignoring `.venv/` and `__pycache__/` and preparing them for removal from git without deleting the local files.
+- [16:16] Reviewed Task 3 for code quality only in `dashboard/kpis.py` and the session log; found no substantive correctness or risk issues affecting the KPI implementation.
+- [16:17] Verified the pre-change red state: `dashboard.app` did not import because the Streamlit entry point module did not exist yet.
+- [16:18] Implemented `dashboard/app.py` with the locked layout order: title and framing, KPI #1 Altair chart, KPI #2-#5 placeholders, and the bottom revenue disclaimer panel; added the three required README run lines.
+- [16:18] Fixed `pyproject.toml` package discovery after `pip install .` failed on flat-layout auto-discovery of both `dashboard` and `logs`; restricted setuptools package finding to `dashboard`.
+- [16:19] Verified `./.venv/bin/pip install .`, `./.venv/bin/python -m compileall dashboard`, `dashboard.app` import, and headless Streamlit startup against `/home/lszczuro/telemedi-data`; missing-env startup could not be reproduced from the repo root because `.env` is auto-loaded in this workspace.
+- [16:20] Reviewed Task 4 for code quality only in `dashboard/app.py`, `README.md`, `pyproject.toml`, and this session log; found no substantive correctness or risk issues in the packaging fix or Streamlit layout behavior.
+- [16:27] Switched `dashboard/app.py` to module-qualified calls and verified `.venv/bin/python -m compileall dashboard/app.py` and `.venv/bin/python -c "import dashboard.app"` both succeed.
+- [16:29] Re-reviewed Task 4 for spec compliance after the follow-up fix; current branch matches the locked order, required function usage, README run lines, disclaimer text, and session-log requirement.
+- [16:42] Acceptance verification exposed `build/lib/` as a tracked packaging byproduct; updated ignore rules and prepared `build/` for removal from git tracking so future `pip install .` runs keep the branch clean.
+- [16:44] Final acceptance sweep: `./.venv/bin/pip install .` passed, `./.venv/bin/python -m compileall dashboard` passed, KPI sample returned `week`/`visit_type`/`visit_count`, missing-env load failed fast with `Missing required environment variable: TELEMEDI_DATA_DIR` from outside the repo, and headless `streamlit run dashboard/app.py` started successfully with `TELEMEDI_DATA_DIR=/home/lszczuro/telemedi-data`.
+- [16:47] Audited repo byproducts and expanded `.gitignore` to cover standard Python cache and packaging outputs (`.pytest_cache/`, `.mypy_cache/`, `.ruff_cache/`, `dist/`) in addition to the existing local env/build ignores.
+- [16:50] Checked git tracking after the ignore cleanup and found `telemedical_dashboard.egg-info/` was still tracked; prepared it for removal from git because `*.egg-info/` is now ignored.
+- [16:56] Committed to idiomatic direct imports in `app.py` because the file is small and has no name collisions or test seams that justify module-qualified calls at every call site.
+- [16:58] Consolidated the per-task review files into the main session log because they duplicated content already captured here and created five files for one session, which breaks curated log discipline.
+- [17:00] Added a directory existence check for `TELEMEDI_DATA_DIR` so non-directory paths fail with a human-readable runtime error while the design-doc boundary of leaving individual CSV-file failures to pandas remains unchanged.
+- [17:02] Expanded package discovery to include `dashboard.*` so future subpackages install correctly without changing today’s single-package behavior; this is forward-compatibility hygiene, not a fix for a current install failure.
