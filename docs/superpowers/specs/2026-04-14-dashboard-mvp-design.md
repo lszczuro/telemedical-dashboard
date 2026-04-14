@@ -76,7 +76,7 @@ Date parsing is treated as decoding and belongs in the I/O layer. The loaders wi
 
 - `visits.csv`: `parse_dates=["visit_date"]`
 - `revenue.csv`: `parse_dates=["transaction_date"]`
-- `patients.csv` and `doctors.csv`: no date parsing unless later inspection shows a real date column is present and required by the app
+- `patients.csv` and `doctors.csv`: no date parsing in this story; `registration_date` and `active_since` are intentionally left untouched until a later KPI actually needs them
 
 No schema validation, coercion framework, or caching is included in this story.
 
