@@ -3,3 +3,5 @@
 - [15:04] Reviewed AGENTS.md and loaded required skills: workflow-logger, brainstorming, and test-driven-development.
 - [15:05] Inspected repository state, KPI scope, README, env example, and recent commits to prepare the MVP dashboard design.
 - [15:07] Confirmed KPI #1 week grain will use Monday-start weeks with Sunday-close labeling via pandas `W-SUN`.
+- [15:12] Locked the implementation design: frozen `TelemediData` container, `load_dotenv()` inside `load_all()`, Altair charting, and `pyproject.toml` for dependencies.
+- [15:14] Wrote the dashboard MVP design spec under `docs/superpowers/specs/` and checked it for scope gaps and ambiguity.
