@@ -29,3 +29,4 @@
 - [16:50] Checked git tracking after the ignore cleanup and found `telemedical_dashboard.egg-info/` was still tracked; prepared it for removal from git because `*.egg-info/` is now ignored.
 - [16:56] Committed to idiomatic direct imports in `app.py` because the file is small and has no name collisions or test seams that justify module-qualified calls at every call site.
 - [16:58] Consolidated the per-task review files into the main session log because they duplicated content already captured here and created five files for one session, which breaks curated log discipline.
+- [17:00] Added a directory existence check for `TELEMEDI_DATA_DIR` so non-directory paths fail with a human-readable runtime error while the design-doc boundary of leaving individual CSV-file failures to pandas remains unchanged.

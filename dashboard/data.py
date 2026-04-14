@@ -27,6 +27,12 @@ def load_all() -> TelemediData:
         raise RuntimeError("Missing required environment variable: TELEMEDI_DATA_DIR")
 
     root = Path(data_dir)
+    if not root.is_dir():
+        raise RuntimeError(
+            "TELEMEDI_DATA_DIR points to a path that does not exist or is not a directory: "
+            f"{data_dir}"
+        )
+
     return TelemediData(
         visits=pd.read_csv(root / "visits.csv", parse_dates=["visit_date"]),
         patients=pd.read_csv(root / "patients.csv"),
